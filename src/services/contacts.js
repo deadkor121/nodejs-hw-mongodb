@@ -13,13 +13,12 @@ export const getContactById = async (contactId) => {
 export const createContact = async (payload) => {
   //payload має бути таким
   //{
-  // name - обов’язково
-  // phoneNumber - обов’язково
+  // name - не обовʼязково
+  // phoneNumber - не обовʼязково
   // email - не обовʼязково
   // isFavourite - не обовʼязково
   // contactType - не обовʼязково
   //}
-
   const contact = await ContactsCollection.create(payload);
   return contact;
 };
