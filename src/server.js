@@ -1,17 +1,27 @@
 import express from 'express';
+import { env } from './utils/env.js';
+import { ENV_VARS } from './constants/index.js';
 import cors from 'cors';
 import pino from 'pino-http';
-
-import contactsRouter from './routers/contacts.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
-import { env } from './utils/env.js';
-const PORT = Number(env('PORT', '3000'));
+import router from './routers/index.js';
+import cookieParser from 'cookie-parser';
+
+const PORT = env(ENV_VARS, 3000);
+
 export const setupServer = () => {
   const app = express();
-  app.use(express.json());
-  app.use(cors());
 
+  app.use(
+    express.json({
+      type: ['application/json', 'application/vnd.api+json'],
+      limit: '250kb',
+    }),
+  );
+
+  app.use(cookieParser());
+  app.use(cors());
   app.use(
     pino({
       transport: {
@@ -20,10 +30,15 @@ export const setupServer = () => {
     }),
   );
 
-  app.use(contactsRouter);
+  app.get('/', (req, res) => {
+    res.json({
+      message: 'Contact App is Running',
+    });
+  });
+
+  app.use(router);
 
   app.use('*', notFoundHandler);
-
   app.use(errorHandler);
 
   app.listen(PORT, () => {
