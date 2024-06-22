@@ -1,12 +1,13 @@
-import { ContactsCollection } from '../db/contact.js';
+import { ContactsCollection } from '../db/models/contact.js';
+
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 import { SORT_ORDER } from '../constants/index.js';
 
 export const getAllContacts = async ({
   page = 1,
   perPage = 10,
-  sortOrder = SORT_ORDER.ASC,
   sortBy = '_id',
+  sortOrder = SORT_ORDER.ASC,
   filter = {},
 }) => {
   const limit = perPage;
@@ -17,8 +18,9 @@ export const getAllContacts = async ({
   if (filter.contactType) {
     contactsQuery.where('contactType').equals(filter.contactType);
   }
-  if (filter.isFavourite) {
-    contactsQuery.where('isFavourite').equals(filter.isFavourite);
+
+  if (filter.isFavorite) {
+    contactsQuery.where('isFavorite').equals(filter.isFavorite);
   }
 
   const [contactsCount, contacts] = await Promise.all([
@@ -38,22 +40,26 @@ export const getAllContacts = async ({
   };
 };
 
-export const getContactById = async (contactId) => {
-  const contact = await ContactsCollection.findById(contactId);
+export const getContactById = async (payload) => {
+  const contact = await ContactsCollection.findOne(payload);
   return contact;
 };
 
-export const createContact = async (payload, userId) => {
-  const contact = await ContactsCollection.create({
-    ...payload,
-    userId: userId,
+export const createContact = async (payload) => {
+  const contact = await ContactsCollection.create(payload);
+  return contact;
+};
+
+export const deleteContact = async (authContactId) => {
+  const contact = await ContactsCollection.findOneAndDelete({
+    _id: authContactId,
   });
   return contact;
 };
 
-export const updateContact = async (contactId, payload, options = {}) => {
+export const updateContact = async (authContactId, payload, options = {}) => {
   const rawResult = await ContactsCollection.findOneAndUpdate(
-    { _id: contactId },
+    { _id: authContactId },
     payload,
     {
       new: true,
@@ -61,18 +67,11 @@ export const updateContact = async (contactId, payload, options = {}) => {
       ...options,
     },
   );
-
-  if (!rawResult || !rawResult.value) return null;
-
+  if (!rawResult || !rawResult.value) {
+    return null;
+  }
   return {
-    contact: rawResult.value,
+    contact: rawResult,
     isNew: Boolean(rawResult?.lastErrorObject?.upserted),
   };
-};
-
-export const deleteContact = async (contactId) => {
-  const contact = await ContactsCollection.findOneAndDelete({
-    _id: contactId,
-  });
-  return contact;
 };
