@@ -32,4 +32,3 @@ router.post(
 
 router.post('/logout', authenticate, ctrlWrapper(logoutUserController));
 
-export default router;
