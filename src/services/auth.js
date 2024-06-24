@@ -2,7 +2,7 @@ import { randomBytes } from 'crypto';
 import bcrypt from 'bcrypt';
 import { UsersCollection } from '../db/user.js';
 import createHttpError from 'http-errors';
-import { FIFTEEN_MINUTES, THIRTY_DAYS } from '../constants/constantsApp.js';
+import { FIFTEEN_MINUTES, THIRTY_DAYS } from '../constants/constansApp.js';
 import { SessionsCollection } from '../db/session.js';
 
 export const registerUser = async (payload) => {
@@ -23,7 +23,7 @@ export const loginUser = async (payload) => {
   if (!user) {
     throw createHttpError(404, 'User not found');
   }
-  const isEqual = await bcrypt.compare(payload.password, user.password); // Порівнюємо хеші паролів
+  const isEqual = await bcrypt.compare(payload.password, user.password);
 
   if (!isEqual) {
     throw createHttpError(401, 'Unauthorized');
