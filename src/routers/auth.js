@@ -1,27 +1,32 @@
 import { Router } from 'express';
+import { ctrlWrapper } from '../utils/ctrlWrapper.js';
+import { loginUserSchema, registerUserSchema } from '../validation/auth.js';
 import {
-  registerUserController,
   loginUserController,
   logoutUserController,
   refreshUserSessionController,
+  registerUserController,
 } from '../controllers/auth.js';
-import { ctrlWrapper } from '../utils/ctrlWrapper.js';
-import { validateBody } from '../middlewares/validateBody.js';
-import { loginUserSchema, registerUserSchema } from '../validation/auth.js';
+import { ValidateBody } from '../middlewares/validateBody.js';
+ 
 
 const router = Router();
 
+
+
 router.post(
   '/register',
-  validateBody(registerUserSchema),
+  ValidateBody(registerUserSchema),
   ctrlWrapper(registerUserController),
 );
+
 router.post(
   '/login',
-  validateBody(loginUserSchema),
+  ValidateBody(loginUserSchema),
   ctrlWrapper(loginUserController),
 );
-router.post('/logout', ctrlWrapper(logoutUserController));
-router.post('/refresh', ctrlWrapper(refreshUserSessionController));
 
+router.post('/refresh', ctrlWrapper(refreshUserSessionController));
 export default router;
+
+router.post('/logout', ctrlWrapper(logoutUserController));
