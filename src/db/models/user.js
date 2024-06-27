@@ -1,18 +1,27 @@
-import { model, Schema } from 'mongoose';
+import { Schema, model } from 'mongoose';
+import { ROLES } from '../../constants/constants.js';
 
-const usersSchema = new Schema(
+const userSchema = new Schema(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    name: { type: String, require: true },
+    email: { type: String, require: true, unique: true },
+    password: { type: String, require: true },
+    role: {
+      type: String,
+      default: ROLES.USER,
+      enum: [ROLES.USER, ROLES.ADMIN],
+    },
   },
-  { timestamps: true, versionKey: false },
+  {
+    timestamps: true,
+    versionKey: false,
+  },
 );
 
-usersSchema.methods.toJSON = function () {
-  const obj = this.toObject();
-  delete obj.password;
-  return obj;
+userSchema.methods.toJSON = function () {
+  const object = this.toObject();
+  delete object.password;
+  return object;
 };
 
-export const UsersCollection = model('users', usersSchema);
+export const User = model('users', userSchema);

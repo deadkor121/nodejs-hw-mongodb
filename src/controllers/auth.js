@@ -1,31 +1,30 @@
-import createHttpError from 'http-errors';
-import { THIRTY_DAYS } from '../constants/contacts.js';
-import { SessionsCollection } from '../db/models/session.js';
+import { REFRESH_TOKEN_LIFE_TIME } from '../constants/constants.js';
 import {
   loginUser,
   logoutUser,
-  refreshUserSession,
+  refreshUser,
   registerUser,
-} from '../services/auth.js';
+} from '../servies/auth.js';
 
 const setupSession = (res, session) => {
-  res.cookie('refreshToken', session.refreshToken, {
-    httpOnly: true,
-    expires: new Date(Date.now() + THIRTY_DAYS),
-  });
   res.cookie('sessionId', session._id, {
     httpOnly: true,
-    expires: new Date(Date.now() + THIRTY_DAYS),
+    expires: new Date(Date.now() + REFRESH_TOKEN_LIFE_TIME),
+  });
+
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: new Date(Date.now() + REFRESH_TOKEN_LIFE_TIME),
   });
 };
 
 export const registerUserController = async (req, res) => {
   const user = await registerUser(req.body);
 
-  res.json({
+  res.status(201).json({
     status: 201,
     message: 'Successfully registered a user!',
-    data: user,
+    data: { name: user.name, email: user.email },
   });
 };
 
@@ -36,15 +35,13 @@ export const loginUserController = async (req, res) => {
 
   res.json({
     status: 200,
-    message: 'Successfully logged an user!',
-    data: {
-      accessToken: session.accessToken,
-    },
+    message: 'Successfully logged in an user!',
+    data: { accessToken: session.accessToken },
   });
 };
 
-export const refreshUserSessionController = async (req, res) => {
-  const session = await refreshUserSession({
+export const refreshUserController = async (req, res) => {
+  const session = await refreshUser({
     sessionId: req.cookies.sessionId,
     refreshToken: req.cookies.refreshToken,
   });
@@ -54,26 +51,16 @@ export const refreshUserSessionController = async (req, res) => {
   res.json({
     status: 200,
     message: 'Successfully refreshed a session!',
-    data: {
-      accessToken: session.accessToken,
-    },
+    data: { accessToken: session.accessToken },
   });
 };
 
 export const logoutUserController = async (req, res) => {
-  const sessionId = req.cookies.sessionId;
-
-  if (!sessionId) {
-    throw createHttpError(401, 'Session not found');
-  }
-
-  const session = await SessionsCollection.findById(sessionId);
-
-  if (!session) {
-    throw createHttpError(401, 'Session not found');
-  }
-
-  await logoutUser(sessionId);
+  if (req.cookies.sessionId)
+    await logoutUser({
+      sessionId: req.cookies.sessionId,
+      refreshToken: req.cookies.refreshToken,
+    });
 
   res.clearCookie('sessionId');
   res.clearCookie('refreshToken');
