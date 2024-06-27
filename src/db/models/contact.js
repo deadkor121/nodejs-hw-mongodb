@@ -1,12 +1,5 @@
 import { model, Schema } from 'mongoose';
 
-const emailValidator = {
-  validator: function (v) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-  },
-  message: (props) => `${props.value} is not a valid email address!`,
-};
-
 const contactSchema = new Schema(
   {
     name: {
@@ -19,7 +12,12 @@ const contactSchema = new Schema(
     },
     email: {
       type: String,
-      validate: emailValidator,
+      validate: {
+        validator: function (v) {
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+        },
+        message: props => `${props.value} is not a valid email address!`,
+      },
     },
     isFavorite: {
       type: Boolean,
@@ -28,7 +26,6 @@ const contactSchema = new Schema(
     contactType: {
       type: String,
       enum: ['work', 'home', 'personal'],
-      required: true,
       default: 'personal',
     },
     userId: {
@@ -42,4 +39,5 @@ const contactSchema = new Schema(
   },
 );
 
-export const Contact = model('contacts', contactSchema);
+export const Contact = model('Contact', contactSchema);
+
