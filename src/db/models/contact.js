@@ -1,37 +1,18 @@
-import { model, Schema } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 const contactSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-    phoneNumber: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      validate: {
-        validator: function (v) {
-          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-        },
-        message: props => `${props.value} is not a valid email address!`,
-      },
-    },
-    isFavorite: {
-      type: Boolean,
-      default: false,
-    },
+    name: { type: String, require: true },
+    phoneNumber: { type: String, require: true },
+    email: { type: String, require: false },
+    isFavourite: { type: Boolean, default: false },
     contactType: {
       type: String,
       enum: ['work', 'home', 'personal'],
+      require: false,
       default: 'personal',
     },
-    userId: {
-      type: Schema.Types.ObjectId,
-      required: true,
-    },
+    userId: { type: Schema.Types.ObjectId, require: true },
   },
   {
     timestamps: true,
@@ -39,5 +20,4 @@ const contactSchema = new Schema(
   },
 );
 
-export const Contact = model('Contact', contactSchema);
-
+export const Contact = model('contacts', contactSchema);
