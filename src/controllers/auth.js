@@ -15,6 +15,7 @@ export const registerUserController = async (req, res) => {
     data: user,
   });
 };
+
 const setupSession = (res, session) => {
   res.cookie('refreshToken', session.refreshToken, {
     httpOnly: true,
@@ -40,6 +41,14 @@ export const loginUserController = async (req, res) => {
 };
 
 export const logoutUserController = async (req, res) => {
+  if (!req.cookies.sessionId) {
+    return res.status(401).json({
+      status: 401,
+      message: 'UnauthorizedError',
+      data: { message: 'Session not found' },
+    });
+  }
+
   await logoutUser(req.cookies.sessionId);
 
   res.clearCookie('sessionId');
@@ -49,6 +58,14 @@ export const logoutUserController = async (req, res) => {
 };
 
 export const refreshUserController = async (req, res) => {
+  if (!req.cookies.sessionId || !req.cookies.refreshToken) {
+    return res.status(401).json({
+      status: 401,
+      message: 'UnauthorizedError',
+      data: { message: 'Session not found' },
+    });
+  }
+
   const session = await refreshUsersSession({
     sessionId: req.cookies.sessionId,
     refreshToken: req.cookies.refreshToken,

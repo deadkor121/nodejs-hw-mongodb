@@ -7,10 +7,9 @@ export const authenticate = async (req, res, next) => {
   if (!header) {
     return next(createHttpError(401, 'Please provide Authorization header'));
   }
-  const bearer = header.split(' ')[0];
-  const token = header.split(' ')[1];
+  const [bearer, token] = header.split(' ');
 
-  if (!bearer === 'Bearer' || !token) {
+  if (bearer !== 'Bearer' || !token) {
     return next(createHttpError(401, 'Auth header should be of type Bearer'));
   }
   const session = await SessionsCollection.findOne({ accessToken: token });
@@ -23,9 +22,9 @@ export const authenticate = async (req, res, next) => {
   }
   const user = await UsersCollection.findById(session.userId);
   if (!user) {
-    return next(createHttpError(401));
+    return next(createHttpError(401, 'User not found'));
   }
   req.user = user;
-
-  return next();
+  req.session = session;  
+  next();
 };
