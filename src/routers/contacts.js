@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import {
-  getContactsController,
-  getContactByIdController,
   createContactController,
-  deleteContactController,
-  upsertContactController,
-  patchContactController,
+  deleteContactsController,
+  getContactsByIdController,
+  getContactsController,
+  patchContactsController,
 } from '../controllers/contacts.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import { validateBody } from '../middlewares/validateBody.js';
@@ -13,29 +12,34 @@ import {
   createContactSchema,
   updateContactSchema,
 } from '../validation/contacts.js';
+import { validateMongoId } from '../middlewares/validateMongoId.js';
 import { authenticate } from '../middlewares/authenticate.js';
+import { upload } from '../middlewares/multer.js';
 
-const router = Router();
+const routerContacts = Router();
 
-router.use(authenticate);
+routerContacts.use('/:contactId', validateMongoId('contactId'));
 
-router.get('/', ctrlWrapper(getContactsController));
-router.get('/:contactId', ctrlWrapper(getContactByIdController));
-router.post(
+routerContacts.use('/', authenticate);
+
+routerContacts.get('', ctrlWrapper(getContactsController));
+
+routerContacts.get('/:contactId', ctrlWrapper(getContactsByIdController));
+
+routerContacts.post(
   '',
+  upload.single('photo'),
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
-router.put(
-  '/:contactId',
-  validateBody(updateContactSchema),
-  ctrlWrapper(upsertContactController),
-);
-router.patch(
-  '/:contactId',
-  validateBody(updateContactSchema),
-  ctrlWrapper(patchContactController),
-);
-router.delete('/:contactId', ctrlWrapper(deleteContactController));
 
-export default router;
+routerContacts.patch(
+  '/:contactId',
+  upload.single('photo'),
+  // validateBody(updateContactSchema),
+  ctrlWrapper(patchContactsController),
+);
+
+routerContacts.delete('/:contactId', ctrlWrapper(deleteContactsController));
+
+export default routerContacts;
