@@ -1,3 +1,4 @@
+// src/constants/index.js
 import path from 'node:path';
 
 export const ENV_VAR = {
@@ -18,7 +19,6 @@ export const ENV_VAR = {
   CLOUD_API_SECRET: 'CLOUD_API_SECRET',
 };
 
-
 export const SORT_ORDER = {
   ASC: 'asc',
   DESC: 'desc',
@@ -26,3 +26,8 @@ export const SORT_ORDER = {
 
 export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'temp');
 export const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
+
+// Экспортируем необходимые переменные
+export const CLOUD_NAME = process.env.CLOUD_NAME;
+export const CLOUD_API_KEY = process.env.CLOUD_API_KEY;
+export const CLOUD_API_SECRET = process.env.CLOUD_API_SECRET;
